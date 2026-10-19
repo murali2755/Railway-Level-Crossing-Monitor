@@ -165,7 +165,3 @@ in real-time and raises a fail-safe alarm on violation.
 ## 10. Viva Quick Reference
 
 See `viva_notes.md` for anticipated questions and prepared answers.
-EOF
-
-echo "README.md created."
-wc -l README.md
