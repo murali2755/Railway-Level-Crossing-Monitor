@@ -1,0 +1,35 @@
+
+========== WORST HOLD PATH ==========
+Startpoint: _220_ (rising edge-triggered flip-flop clocked by clk)
+Endpoint: _220_ (rising edge-triggered flip-flop clocked by clk)
+Path Group: clk
+Path Type: min
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock clk (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _220_/CLK (sky130_fd_sc_hd__dfxtp_1)
+   0.1823    0.1823 ^ _220_/Q (sky130_fd_sc_hd__dfxtp_1)
+   0.0382    0.2205 v _197_/Y (sky130_fd_sc_hd__o21bai_1)
+   0.0377    0.2582 ^ _198_/Y (sky130_fd_sc_hd__a31oi_1)
+   0.0000    0.2582 ^ _220_/D (sky130_fd_sc_hd__dfxtp_1)
+             0.2582   data arrival time
+
+   0.0000    0.0000   clock clk (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.1000    0.1000   clock uncertainty
+   0.0000    0.1000   clock reconvergence pessimism
+             0.1000 ^ _220_/CLK (sky130_fd_sc_hd__dfxtp_1)
+  -0.0183    0.0817   library hold time
+             0.0817   data required time
+-------------------------------------------------------------
+             0.0817   data required time
+            -0.2582   data arrival time
+-------------------------------------------------------------
+             0.1764   slack (MET)
+
+
+
+========== Worst HOLD SLACK ==========
+worst slack 0.18

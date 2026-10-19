@@ -1,0 +1,152 @@
+# Railway Level Crossing Monitor - Specification
+
+Status: FROZEN (do not change without a written amendment)
+
+## 1. Real-World Problem
+
+A railway level crossing must execute a strict safety sequence when a train
+approaches:
+
+    TRAIN -> LIGHTS ON -> BARRIER DOWN -> TRAIN PASSES -> BARRIER UP -> LIGHTS OFF
+
+If any step happens out of order, or takes too long, the crossing is unsafe.
+Current crossing controllers rely on relay logic and human supervision. A
+dedicated digital monitor that continuously verifies the sequence and raises a
+fail-safe alarm on violation improves safety and provides a diagnostic code.
+
+## 2. Proposed Solution
+
+A compact digital circuit that:
+- Observes the crossing sensor signals in real time
+- Verifies that the expected sequence of events occurs in order
+- Times each safety-critical stage and raises a fault on timeout
+- Latches the fault and reports the specific violation via an error code
+
+The chip is a MONITOR (watcher). It does NOT drive the barriers or lights
+directly. It is a parallel safety checker.
+
+## 3. RTL Interface
+
+### Inputs (12 total)
+
+| Signal             | Width | Meaning                                |
+|--------------------|-------|----------------------------------------|
+| clk                | 1     | System clock (20 MHz nominal)          |
+| reset              | 1     | Synchronous reset, active high         |
+| train_approach     | 1     | Sensor: train is approaching           |
+| train_depart       | 1     | Sensor: train has cleared the crossing |
+| light_on_sensor    | 1     | Feedback: warning lights are ON        |
+| barrier_down_sensor| 1     | Feedback: barrier is fully DOWN        |
+| barrier_up_sensor  | 1     | Feedback: barrier is fully UP          |
+
+### Outputs (5 total)
+
+| Signal       | Width | Meaning                                              |
+|--------------|-------|------------------------------------------------------|
+| fail_safe    | 1     | 1 = sequence violation or timeout; crossing is unsafe|
+| sequence_ok  | 1     | 1 = sequence is proceeding normally                  |
+| error_code   | 3     | 000 = no error; 001..110 = specific violation        |
+
+
+
+## 4. Finite State Machine
+
+Six states, 3-bit binary encoding, 3 flip-flops.
+
+| State     | Encoding | Meaning                              | Normal exit condition   |
+|-----------|----------|--------------------------------------|-------------------------|
+| S_IDLE    | 3'b000   | No train, all clear                  | train_approach = 1      |
+| S_WARN    | 3'b001   | Warning lights should turn ON        | light_on_sensor = 1     |
+| S_BARRIER | 3'b010   | Barrier should go DOWN               | barrier_down_sensor = 1 |
+| S_PASSING | 3'b011   | Train is crossing                    | train_depart = 1        |
+| S_CLEAR   | 3'b100   | Barrier should go UP                 | barrier_up_sensor = 1   |
+| S_FAULT   | 3'b101   | Sequence violated; stuck until reset | reset = 1               |
+
+Transitions occur on the rising edge of clk. Any unexpected sensor assertion
+or a timeout pushes the FSM to S_FAULT.
+
+## 5. Timeout Logic
+
+A single shared 8-bit counter counts clk cycles while in a safety state.
+If the counter reaches the state limit before the expected sensor fires,
+the FSM transitions to S_FAULT with the appropriate error code.
+
+| State     | Max cycles | Rationale                              |
+|-----------|------------|----------------------------------------|
+| S_WARN    | 200        | Lights should respond quickly          |
+| S_BARRIER | 250        | Barrier descent has mechanical delay   |
+| S_PASSING | 255 (max)  | Longest legitimate train transit       |
+| S_CLEAR   | 200        | Barrier ascent should be similar       |
+| S_IDLE    | -          | No timeout; waits for train_approach   |
+| S_FAULT   | -          | No timeout; latched until reset        |
+
+The counter is cleared on every state transition and on reset.
+
+## 6. Error Codes
+
+| Code  | Condition                                             |
+|-------|-------------------------------------------------------|
+| 3'b000| No error                                              |
+| 3'b001| Timeout in S_BARRIER (barrier did not go down in time)|
+| 3'b010| barrier_down_sensor asserted before lights ON         |
+| 3'b011| train_depart asserted before barrier DOWN             |
+| 3'b100| barrier_down_sensor asserted while not in S_BARRIER   |
+| 3'b101| Timeout in S_CLEAR (barrier did not go up in time)    |
+| 3'b110| Timeout in S_WARN (lights did not turn ON in time)    |
+| 3'b111| Reserved                                              |
+
+## 7. Reset Behaviour
+
+When reset = 1 (sampled on the rising edge of clk):
+- FSM state       -> S_IDLE (3'b000)
+- fail_safe       -> 0
+- sequence_ok     -> 0
+- error_code      -> 3'b000
+- timeout counter -> 0
+## 8. Sequential Logic Elements
+
+| Element              | Width | Purpose                              |
+|----------------------|-------|--------------------------------------|
+| FSM state register   | 3     | Tracks sequence stage                |
+| Timeout counter      | 8     | Detects stall in safety states       |
+| Error code register  | 3     | Latches the specific violation       |
+| Total flip-flops     | 14    | Fits easily in a 100 x 100 um die    |
+
+No memories, no latches, no macros.
+
+## 9. Design Constraints (Mandatory)
+
+- Target die: 100 um x 100 um (SKY130 sky130_fd_sc_hd)
+- RTL: synthesizable Verilog-2005, macro-free
+- No `define / `ifdef / `ifndef / `include in project files
+- All constants via localparam
+- Clock period target: 50 ns (20 MHz)
+- STA pre-layout and post-layout across all 16 SKY130 corners
+
+## 10. Test Cases
+
+| #  | Test                                        | Expected result                     |
+|----|---------------------------------------------|-------------------------------------|
+| 1  | Reset asserted                              | state=S_IDLE, all outputs 0         |
+| 2  | Full correct sequence                       | sequence_ok=1 at each step, no fail |
+| 3  | Train approach -> WARN                      | state=S_WARN, sequence_ok=1         |
+| 4  | Lights ON in time -> BARRIER                | state=S_BARRIER                     |
+| 5  | Barrier DOWN in time -> PASSING             | state=S_PASSING                     |
+| 6  | Train depart -> CLEAR                       | state=S_CLEAR                       |
+| 7  | Barrier UP in time -> IDLE                  | state=S_IDLE, sequence_ok=0         |
+| 8  | Timeout in WARN (lights never ON)           | S_FAULT, fail_safe=1, err=3'b110    |
+| 9  | Timeout in BARRIER (never DOWN)             | S_FAULT, fail_safe=1, err=3'b001    |
+| 10 | barrier_down before lights ON               | S_FAULT, fail_safe=1, err=3'b010    |
+| 11 | train_depart while in WARN                  | S_FAULT, fail_safe=1, err=3'b011    |
+| 12 | Fault latches until reset                   | fail_safe stays 1; reset clears     |
+| 13 | Motor interlock                             | sequence_ok and fail_safe never both 1 |
+
+## 11. Project Statement
+
+"My project is a Railway Level Crossing Monitor that solves unsafe level
+crossing sequences by taking train approach and depart sensors, light and
+barrier feedback sensors, clock, and reset as inputs and producing fail_safe,
+sequence_ok, and a 3-bit error_code as outputs. It uses a 6-state finite state
+machine, an 8-bit timeout counter, and a 3-bit error register as its main
+sequential logic."
+

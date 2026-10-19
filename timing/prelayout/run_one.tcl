@@ -1,0 +1,18 @@
+read_liberty $env(LIB_FILE)
+read_verilog $env(NETLIST_FILE)
+link_design railway_level_crossing_monitor
+read_sdc $env(SDC_FILE)
+
+puts "----- SETUP (max) -----"
+report_checks -path_delay max -format summary -digits 4
+report_worst_slack -max
+
+puts "----- HOLD (min) -----"
+report_checks -path_delay min -format summary -digits 4
+report_worst_slack -min
+
+puts "----- TNS / WNS -----"
+report_tns
+report_wns
+
+exit

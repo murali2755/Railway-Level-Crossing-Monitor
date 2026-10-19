@@ -1,0 +1,40 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Mon Oct 12 13:59:29 2026
+[*]
+[dumpfile] "/home/vsduser/Desktop/Railway_Level_Crossing_Monitor/sim/rtl/railway_level_crossing_monitor.vcd"
+[dumpfile_mtime] "Mon Oct 12 13:47:08 2026"
+[dumpfile_size] 21522
+[savefile] "/home/vsduser/Desktop/Railway_Level_Crossing_Monitor/evidence/screenshots/C3_rtl_timeout_warn.png.gtkw"
+[timestart] 0
+[size] 1853 945
+[pos] -1 -1
+*0.000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] railway_level_crossing_monitor_tb.
+[sst_width] 223
+[signals_width] 182
+[sst_expanded] 1
+[sst_vpaned_height] 273
+@28
+railway_level_crossing_monitor_tb.clk
+railway_level_crossing_monitor_tb.reset
+railway_level_crossing_monitor_tb.train_approach
+railway_level_crossing_monitor_tb.train_depart
+railway_level_crossing_monitor_tb.light_on_sensor
+railway_level_crossing_monitor_tb.barrier_down_sensor
+railway_level_crossing_monitor_tb.barrier_up_sensor
+railway_level_crossing_monitor_tb.fail_safe
+railway_level_crossing_monitor_tb.sequence_ok
+railway_level_crossing_monitor_tb.error_code[2:0]
+@420
+railway_level_crossing_monitor_tb.fail_count
+@800029
+railway_level_crossing_monitor_tb.uut.state[2:0]
+@29
+(0)railway_level_crossing_monitor_tb.uut.state[2:0]
+(1)railway_level_crossing_monitor_tb.uut.state[2:0]
+(2)railway_level_crossing_monitor_tb.uut.state[2:0]
+@1001201
+-group_end
+[pattern_trace] 1
+[pattern_trace] 0

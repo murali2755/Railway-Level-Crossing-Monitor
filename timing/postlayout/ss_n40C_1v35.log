@@ -1,0 +1,19 @@
+Warning: /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ss_n40C_1v35.lib line 24, default_fanout_load is 0.0.
+Warning: /home/vsduser/Desktop/Railway_Level_Crossing_Monitor/openlane/runs/railway_100x100/results/synthesis/railway_level_crossing_monitor.synthesis_preroute.v line 582, module sky130_fd_sc_hd__tapvpwrvgnd_1 not found. Creating black box for PHY_56.
+Warning: /home/vsduser/Desktop/Railway_Level_Crossing_Monitor/openlane/runs/railway_100x100/results/synthesis/railway_level_crossing_monitor.synthesis_preroute.v line 710, module sky130_fd_sc_hd__fill_1 not found. Creating black box for FILLER_0_94.
+Warning: /home/vsduser/Desktop/Railway_Level_Crossing_Monitor/openlane/runs/railway_100x100/results/synthesis/railway_level_crossing_monitor.synthesis_preroute.v line 742, module sky130_fd_sc_hd__fill_2 not found. Creating black box for FILLER_2_27.
+----- SETUP (max) -----
+Startpoint                           Endpoint                                 Slack
+----------------------------------------------------------------------------------
+_252_/Q (sky130_fd_sc_hd__dfxtp_1)   _250_/D (sky130_fd_sc_hd__dfxtp_1)     35.6895
+
+worst slack 35.69
+----- HOLD (min) -----
+Startpoint                           Endpoint                                 Slack
+----------------------------------------------------------------------------------
+_246_/Q (sky130_fd_sc_hd__dfxtp_1)   _246_/D (sky130_fd_sc_hd__dfxtp_1)      2.2086
+
+worst slack 2.21
+----- TNS / WNS -----
+tns 0.00
+wns 0.00

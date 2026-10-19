@@ -1,0 +1,230 @@
+// ============================================================
+// Testbench for Railway Level Crossing Monitor
+// Self-checking. 13 test cases. Macro-free.
+// ============================================================
+
+`timescale 1ns/1ps
+
+module railway_level_crossing_monitor_tb;
+
+    // ---------------- signals ----------------
+    reg        clk;
+    reg        reset;
+    reg        train_approach;
+    reg        train_depart;
+    reg        light_on_sensor;
+    reg        barrier_down_sensor;
+    reg        barrier_up_sensor;
+
+    wire       fail_safe;
+    wire       sequence_ok;
+    wire [2:0] error_code;
+
+    integer    fail_count = 0;
+
+    // ---------------- FSM state constants ----------------
+    localparam [2:0] S_IDLE    = 3'b000;
+    localparam [2:0] S_WARN    = 3'b001;
+    localparam [2:0] S_BARRIER = 3'b010;
+    localparam [2:0] S_PASSING = 3'b011;
+    localparam [2:0] S_CLEAR   = 3'b100;
+    localparam [2:0] S_FAULT   = 3'b101;
+
+    // ---------------- DUT ----------------
+    railway_level_crossing_monitor uut (
+        .clk                 (clk),
+        .reset               (reset),
+        .train_approach      (train_approach),
+        .train_depart        (train_depart),
+        .light_on_sensor     (light_on_sensor),
+        .barrier_down_sensor (barrier_down_sensor),
+        .barrier_up_sensor   (barrier_up_sensor),
+        .fail_safe           (fail_safe),
+        .sequence_ok         (sequence_ok),
+        .error_code          (error_code)
+    );
+
+    // ---------------- clock ----------------
+    initial clk = 0;
+    always #5 clk = ~clk;   // 10 ns period (100 MHz) — sim-only
+
+    // ---------------- helper tasks ----------------
+    task check;
+        input [8*40:1] label;
+        input          cond;
+        begin
+            if (!cond) begin
+                $display("%0s FAILED  | t=%0t state=%b fs=%b ok=%b err=%b",
+                         label, $time, uut.state, fail_safe, sequence_ok, error_code);
+                fail_count = fail_count + 1;
+            end else begin
+                $display("%0s PASSED", label);
+            end
+        end
+    endtask
+
+    task drive_idle;
+        begin
+            train_approach      = 0;
+            train_depart        = 0;
+            light_on_sensor     = 0;
+            barrier_down_sensor = 0;
+            barrier_up_sensor   = 0;
+        end
+    endtask
+
+    task pulse_reset;
+        begin
+            reset = 1;
+            @(negedge clk);
+            @(negedge clk);
+            @(negedge clk);
+            reset = 0;
+        end
+    endtask
+
+    // ---------------- test sequence ----------------
+    initial begin
+        $dumpfile("railway_level_crossing_monitor.vcd");
+        $dumpvars(0, railway_level_crossing_monitor_tb);
+
+        reset = 1;
+        drive_idle;
+
+        // =====================================================
+        // Test 1 — Reset behavior
+        // =====================================================
+        @(negedge clk);
+        check("Test 1 ", (fail_safe === 0) &&
+                        (sequence_ok === 0) && (error_code === 3'b000));
+
+        reset = 0;
+        @(negedge clk); @(negedge clk);
+
+        // =====================================================
+        // Test 2 — Full correct sequence (walk through states)
+        // =====================================================
+        // IDLE -> WARN
+        drive_idle;
+        @(negedge clk);
+        train_approach = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 3 ", (sequence_ok === 1) && (fail_safe === 0));
+
+        // WARN -> BARRIER (lights ON)
+        train_approach  = 0;
+        light_on_sensor = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 4 ", (sequence_ok === 1) && (fail_safe === 0));
+
+        // BARRIER -> PASSING (barrier DOWN)
+        barrier_down_sensor = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 5 ", (sequence_ok === 1) && (fail_safe === 0));
+
+        // PASSING -> CLEAR (train departs)
+        train_depart = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 6 ", (sequence_ok === 1) && (fail_safe === 0));
+
+        // CLEAR -> IDLE (barrier UP)
+        train_depart     = 0;
+        barrier_down_sensor = 0;
+        barrier_up_sensor   = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 7 ", (sequence_ok === 0) && (fail_safe === 0));
+
+        check("Test 2 ", (error_code === 3'b000));
+
+        // Reset before next test
+        pulse_reset;
+        drive_idle;
+
+        // =====================================================
+        // Test 8 — Timeout in WARN (lights never ON)
+        // =====================================================
+        @(negedge clk);
+        train_approach = 1;
+        @(negedge clk); @(negedge clk);
+        // Now in S_WARN, wait > 200 cycles
+        repeat (220) @(negedge clk);
+        check("Test 8 ", (fail_safe === 1) && (error_code === 3'b110));
+
+        pulse_reset;
+        drive_idle;
+
+        // =====================================================
+        // Test 9 — Timeout in BARRIER (barrier never DOWN)
+        // =====================================================
+        @(negedge clk);
+        train_approach = 1;
+        @(negedge clk); @(negedge clk);
+        train_approach  = 0;
+        light_on_sensor = 1;
+        @(negedge clk); @(negedge clk);
+        // Now in S_BARRIER, wait > 250 cycles
+        repeat (280) @(negedge clk);
+        check("Test 9 ", (fail_safe === 1) && (error_code === 3'b001));
+
+        pulse_reset;
+        drive_idle;
+
+        // =====================================================
+        // Test 10 — barrier DOWN before lights ON
+        // =====================================================
+        @(negedge clk);
+        train_approach = 1;
+        @(negedge clk); @(negedge clk);
+        // Now in S_WARN, assert barrier_down before lights
+        train_approach      = 0;
+        barrier_down_sensor = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 10", (fail_safe === 1) && (error_code === 3'b010));
+
+        pulse_reset;
+        drive_idle;
+
+        // =====================================================
+        // Test 11 — train_depart while in WARN
+        // =====================================================
+        @(negedge clk);
+        train_approach = 1;
+        @(negedge clk); @(negedge clk);
+        // Now in S_WARN, assert train_depart early
+        train_approach = 0;
+        train_depart   = 1;
+        @(negedge clk); @(negedge clk);
+        check("Test 11", (fail_safe === 1) && (error_code === 3'b011));
+
+        // =====================================================
+        // Test 12 — Fault latches until reset
+        // =====================================================
+        // Wait many cycles, fault must persist
+        repeat (50) @(negedge clk);
+        check("Test 12a", (fail_safe === 1));
+        drive_idle;
+
+        // Apply reset
+        reset = 1;
+        @(negedge clk); @(negedge clk);
+        reset = 0;
+        @(negedge clk); @(negedge clk);
+        check("Test 12b", (fail_safe === 0) && (error_code === 3'b000));
+
+        // =====================================================
+        // Test 13 — Motor interlock: sequence_ok and fail_safe never both 1
+        // =====================================================
+        check("Test 13", !((sequence_ok === 1) && (fail_safe === 1)));
+
+        // =====================================================
+        // Summary
+        // =====================================================
+        if (fail_count == 0)
+            $display("=== All tests PASSED ===");
+        else
+            $display("=== %0d test(s) FAILED ===", fail_count);
+
+        $finish;
+    end
+
+endmodule

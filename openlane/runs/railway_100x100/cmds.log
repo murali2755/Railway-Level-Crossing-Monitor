@@ -1,0 +1,179 @@
+Mon Oct 19 03:48:16 UTC 2026 - Executing "python3 /openLANE_flow/scripts/extract_metal_layers.py -t /pdks/sky130A/libs.ref/sky130_fd_sc_hd/techlef/sky130_fd_sc_hd.tlef -o /project/openlane/runs/railway_100x100/tmp/met_layers_list.txt"
+
+Mon Oct 19 03:48:16 UTC 2026 - Executing "/openLANE_flow/scripts/mergeLef.py -i /pdks/sky130A/libs.ref/sky130_fd_sc_hd/techlef/sky130_fd_sc_hd.tlef {/pdks/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_fd_sc_hd.lef /pdks/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_ef_sc_hd__fill_12.lef /pdks/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_ef_sc_hd__decap_12.lef /pdks/sky130A/libs.ref/sky130_fd_sc_hd/lef/sky130_ef_sc_hd__fakediode_2.lef} -o /project/openlane/runs/railway_100x100/tmp/merged_unpadded.lef |& tee >&@stdout"
+
+Mon Oct 19 03:48:16 UTC 2026 - Executing "/openLANE_flow/scripts/libtrim.pl /pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib /project/openlane/runs/railway_100x100/tmp/trimmed.lib.exclude.list > /project/openlane/runs/railway_100x100/tmp/trimmed.lib"
+
+Mon Oct 19 03:48:16 UTC 2026 - Executing "echo {openlane v0.21} > /project/openlane/runs/railway_100x100/OPENLANE_VERSION"
+
+Mon Oct 19 03:48:16 UTC 2026 - Executing "sed -E {s/^([[:space:]]+)pg_pin(.*)/\1pin\2\n\1    direction : "inout";/g} /pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib > /project/openlane/runs/railway_100x100/tmp/sky130_fd_sc_hd__tt_025C_1v80.no_pg.lib"
+
+Mon Oct 19 03:48:16 UTC 2026 - Executing "yosys -c /openLANE_flow/scripts/synth.tcl -l /project/openlane/runs/railway_100x100/logs/synthesis/1-yosys.log |& tee >&@stdout"
+
+Mon Oct 19 03:48:18 UTC 2026 - Executing "sed -i -e {s/\(set ::env(CURRENT_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:48:18 UTC 2026 - Executing "sed -i -e {s/\(set ::env(PREV_NETLIST)\).*/\1 0/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:48:18 UTC 2026 - Executing "sed -i /defparam/d /project/openlane/runs/railway_100x100/results/synthesis/railway_level_crossing_monitor.synthesis.v"
+
+Mon Oct 19 03:48:18 UTC 2026 - Executing "sta /openLANE_flow/scripts/sta.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/synthesis/2-opensta"
+
+Mon Oct 19 03:48:19 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_floorplan.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/floorplan/3-verilog2def.openroad.log"
+
+Mon Oct 19 03:48:20 UTC 2026 - Executing "python3 /openLANE_flow/scripts/io_place.py --input-lef /project/openlane/runs/railway_100x100/tmp/merged.lef --input-def /project/openlane/runs/railway_100x100/tmp/floorplan/3-verilog2def_openroad.def --config /project/openlane/pin_order.cfg --hor-layer 4 --ver-layer 3 --ver-width-mult 2 --hor-width-mult 2 --hor-extension -1 --ver-extension -1 --length 4 -o /project/openlane/runs/railway_100x100/tmp/floorplan/4-ioPlacer.def |& tee /project/openlane/runs/railway_100x100/logs/floorplan/4-place_io_ol.log >&@stdout"
+
+Mon Oct 19 03:48:21 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_tapcell.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/floorplan/5-tapcell.log"
+
+Mon Oct 19 03:48:22 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/floorplan/railway_level_crossing_monitor.floorplan.def |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/6-klayout.scrot.log"
+
+Mon Oct 19 03:48:26 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_pdn.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/floorplan/7-pdn.log"
+
+Mon Oct 19 03:48:28 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_replace.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/placement/8-replace.log"
+
+Mon Oct 19 03:48:34 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_resizer.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/placement/8-resizer.log"
+
+Mon Oct 19 03:48:40 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_write_verilog.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/9-write_verilog.log"
+
+Mon Oct 19 03:48:41 UTC 2026 - Executing "sed -i -e {s/\(set ::env(CURRENT_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_optimized.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:48:41 UTC 2026 - Executing "sed -i -e {s/\(set ::env(PREV_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:48:41 UTC 2026 - Executing "sta /openLANE_flow/scripts/sta.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/synthesis/10-opensta_post_resizer"
+
+Mon Oct 19 03:48:42 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_opendp.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/placement/11-opendp.log"
+
+Mon Oct 19 03:48:43 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/placement/railway_level_crossing_monitor.placement.def |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/12-klayout.scrot.log"
+
+Mon Oct 19 03:48:48 UTC 2026 - Executing "/openLANE_flow/scripts/libtrim.pl /pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib /project/openlane/runs/railway_100x100/tmp/cts.lib.exclude.list > /project/openlane/runs/railway_100x100/tmp/cts.lib"
+
+Mon Oct 19 03:48:48 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_cts.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/cts/13-cts.log"
+
+Mon Oct 19 03:49:55 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_write_verilog.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/14-write_verilog.log"
+
+Mon Oct 19 03:49:56 UTC 2026 - Executing "sed -i -e {s/\(set ::env(CURRENT_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_cts.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:49:56 UTC 2026 - Executing "sed -i -e {s/\(set ::env(PREV_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_optimized.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:49:56 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/cts/railway_level_crossing_monitor.cts.def |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/15-klayout.scrot.log"
+
+Mon Oct 19 03:50:00 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_resizer_timing.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/placement/15-resizer_timing.log"
+
+Mon Oct 19 03:50:05 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_write_verilog.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/16-write_verilog.log"
+
+Mon Oct 19 03:50:07 UTC 2026 - Executing "sed -i -e {s/\(set ::env(CURRENT_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_optimized.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:50:07 UTC 2026 - Executing "sed -i -e {s/\(set ::env(PREV_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_cts.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:50:07 UTC 2026 - Executing "sta /openLANE_flow/scripts/sta.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/synthesis/17-opensta_post_resizer_timing"
+
+Mon Oct 19 03:50:09 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_groute.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/routing/18-fastroute.log"
+
+Mon Oct 19 03:50:12 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_fill.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/routing/19-addspacers.log"
+
+Mon Oct 19 03:50:14 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_write_verilog.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/20-write_verilog.log"
+
+Mon Oct 19 03:50:15 UTC 2026 - Executing "sed -i -e {s/\(set ::env(CURRENT_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_preroute.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:50:15 UTC 2026 - Executing "sed -i -e {s/\(set ::env(PREV_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_optimized.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:50:15 UTC 2026 - Executing "envsubst < /openLANE_flow/scripts/tritonRoute.param > /project/openlane/runs/railway_100x100/tmp/routing/21-tritonRoute.param"
+
+Mon Oct 19 03:50:15 UTC 2026 - Executing "TritonRoute /project/openlane/runs/railway_100x100/tmp/routing/21-tritonRoute.param |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/routing/21-tritonRoute.log"
+
+Mon Oct 19 03:50:54 UTC 2026 - Executing "python3 /openLANE_flow/scripts/tr2klayout.py -i /project/openlane/runs/railway_100x100/reports/routing/21-tritonRoute.drc -o /project/openlane/runs/railway_100x100/reports/routing/21-tritonRoute.klayout.xml --design-name railway_level_crossing_monitor"
+
+Mon Oct 19 03:50:54 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/routing/railway_level_crossing_monitor.def |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/22-klayout.scrot.log"
+
+Mon Oct 19 03:51:00 UTC 2026 - Executing "python3 /openLANE_flow/scripts/spef_extractor/main.py -l /project/openlane/runs/railway_100x100/tmp/merged_unpadded.lef -d /project/openlane/runs/railway_100x100/results/routing/railway_level_crossing_monitor.def -mw L -ec 1 |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/routing/23-spef_extraction.log"
+
+Mon Oct 19 03:51:01 UTC 2026 - Executing "sta /openLANE_flow/scripts/sta.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/synthesis/24-opensta_spef"
+
+Mon Oct 19 03:51:02 UTC 2026 - Executing "python3 /openLANE_flow/scripts/write_powered_def.py -d /project/openlane/runs/railway_100x100/results/routing/railway_level_crossing_monitor.def -l /project/openlane/runs/railway_100x100/tmp/merged.lef --power-port VPWR --ground-port VGND --powered-netlist {} -o /project/openlane/runs/railway_100x100/tmp/routing/25-railway_level_crossing_monitor.powered.def |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/lvs/25-write_powered_verilog.log"
+
+Mon Oct 19 03:51:02 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_write_verilog.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/26-write_verilog.log"
+
+Mon Oct 19 03:51:03 UTC 2026 - Executing "sed -i -e {s/\(set ::env(CURRENT_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/lvs\/railway_level_crossing_monitor.lvs.powered.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:51:03 UTC 2026 - Executing "sed -i -e {s/\(set ::env(PREV_NETLIST)\).*/\1 \/project\/openlane\/runs\/railway_100x100\/results\/synthesis\/railway_level_crossing_monitor.synthesis_preroute.v/} /project/openlane/runs/railway_100x100/config.tcl"
+
+Mon Oct 19 03:51:03 UTC 2026 - Executing "magic -noconsole -dnull -rcfile /pdks/sky130A/libs.tech/magic/sky130A.magicrc /openLANE_flow/scripts/magic/mag_gds.tcl </dev/null |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/magic/27-magic.log"
+
+Mon Oct 19 03:51:05 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/magic/railway_level_crossing_monitor.gds |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/28-klayout.scrot.log"
+
+Mon Oct 19 03:51:10 UTC 2026 - Executing "magic -noconsole -dnull -rcfile /pdks/sky130A/libs.tech/magic/sky130A.magicrc /openLANE_flow/scripts/magic/gds_pointers.tcl </dev/null |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/magic/29-magic.mag.gds_ptrs.log"
+
+Mon Oct 19 03:51:10 UTC 2026 - Executing "sed -i -n {/^<< properties >>/,/^<< end >>/p} /project/openlane/runs/railway_100x100/tmp/magic/magic_gds_ptrs.mag"
+
+Mon Oct 19 03:51:10 UTC 2026 - Executing "magic -noconsole -dnull -rcfile /pdks/sky130A/libs.tech/magic/sky130A.magicrc /openLANE_flow/scripts/magic/lef.tcl </dev/null |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/magic/30-magic.lef.log"
+
+Mon Oct 19 03:51:11 UTC 2026 - Executing "magic -noconsole -dnull -rcfile /pdks/sky130A/libs.tech/magic/sky130A.magicrc /openLANE_flow/scripts/magic/maglef.tcl </dev/null |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/magic/31-magic.maglef.log"
+
+Mon Oct 19 03:51:11 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/def2gds.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/routing/railway_level_crossing_monitor.def railway_level_crossing_monitor /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.gds {/pdks/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_ef_sc_hd__fill_12.gds /pdks/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_ef_sc_hd__fakediode_2.gds /pdks/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_fd_sc_hd.gds /pdks/sky130A/libs.ref/sky130_fd_sc_hd/gds/sky130_ef_sc_hd__decap_12.gds } |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/32-klayout.log"
+
+Mon Oct 19 03:51:15 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.gds |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/33-klayout.scrot.log"
+
+Mon Oct 19 03:51:20 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/xor.sh /project/openlane/runs/railway_100x100/results/magic/railway_level_crossing_monitor.gds /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.gds railway_level_crossing_monitor /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.xor.gds |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/34-klayout.xor.log"
+
+Mon Oct 19 03:51:26 UTC 2026 - Executing "python3 /openLANE_flow/scripts/parse_klayout_xor_log.py -l /project/openlane/runs/railway_100x100/logs/klayout/34-klayout.xor.log -o /project/openlane/runs/railway_100x100/reports/klayout/34-klayout.xor.rpt"
+
+Mon Oct 19 03:51:26 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/scrotLayout.sh /pdks/sky130A/libs.tech/klayout/sky130A.lyt /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.xor.gds |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/35-klayout.scrot.log"
+
+Mon Oct 19 03:51:31 UTC 2026 - Executing "bash /openLANE_flow/scripts/klayout/xor.sh /project/openlane/runs/railway_100x100/results/magic/railway_level_crossing_monitor.gds /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.gds railway_level_crossing_monitor /project/openlane/runs/railway_100x100/results/klayout/railway_level_crossing_monitor.xor.xml |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/klayout/36-klayout.xor.log"
+
+Mon Oct 19 03:51:38 UTC 2026 - Executing "python3 /openLANE_flow/scripts/parse_klayout_xor_log.py -l /project/openlane/runs/railway_100x100/logs/klayout/36-klayout.xor.log -o /project/openlane/runs/railway_100x100/reports/klayout/36-klayout.xor.rpt"
+
+Mon Oct 19 03:51:38 UTC 2026 - Executing "magic -noconsole -dnull -rcfile /pdks/sky130A/libs.tech/magic/sky130A.magicrc /project/openlane/runs/railway_100x100/tmp/magic_spice.tcl </dev/null |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/magic/37-magic_spice.log"
+
+Mon Oct 19 03:51:39 UTC 2026 - Executing "netgen -batch source /project/openlane/runs/railway_100x100/tmp/lvs/setup_file.lef.lvs |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/lvs/38-lvs.lef.log"
+
+Mon Oct 19 03:51:39 UTC 2026 - Executing "magic -noconsole -dnull -rcfile /pdks/sky130A/libs.tech/magic/sky130A.magicrc /openLANE_flow/scripts/magic/drc.tcl </dev/null |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/magic/39-magic.drc.log"
+
+Mon Oct 19 03:51:41 UTC 2026 - Executing "python3 /openLANE_flow/scripts/magic_drc_to_tcl.py -i /project/openlane/runs/railway_100x100/reports/magic/39-magic.drc -o /project/openlane/runs/railway_100x100/reports/magic/39-magic.drc.tcl"
+
+Mon Oct 19 03:51:41 UTC 2026 - Executing "python3 /openLANE_flow/scripts/magic_drc_to_tr_drc.py -i /project/openlane/runs/railway_100x100/reports/magic/39-magic.drc -o /project/openlane/runs/railway_100x100/reports/magic/39-magic.tr.drc"
+
+Mon Oct 19 03:51:41 UTC 2026 - Executing "python3 /openLANE_flow/scripts/tr2klayout.py -i /project/openlane/runs/railway_100x100/reports/magic/39-magic.tr.drc -o /project/openlane/runs/railway_100x100/reports/magic/39-magic.drc.klayout.xml --design-name railway_level_crossing_monitor"
+
+Mon Oct 19 03:51:41 UTC 2026 - Executing "python3 /openLANE_flow/scripts/magic_drc_to_rdb.py --magic_drc_in /project/openlane/runs/railway_100x100/reports/magic/39-magic.drc --rdb_out /project/openlane/runs/railway_100x100/reports/magic/39-magic.drc.rdb"
+
+Mon Oct 19 03:51:41 UTC 2026 - Executing "openroad -exit /openLANE_flow/scripts/openroad/or_antenna_check.tcl |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/routing/40-or_antenna.log"
+
+Mon Oct 19 03:51:42 UTC 2026 - Executing "mv -f /project/openlane/runs/railway_100x100/reports/routing/antenna.rpt /project/openlane/runs/railway_100x100/reports/routing/41-antenna.rpt"
+
+Mon Oct 19 03:51:43 UTC 2026 - Executing "awk { BEGIN {  # Print power and standard_input definitions
+    print "VPWR power 1.8";
+    print "VGND power 0.0";
+    print "#define std_input min@VGND max@VPWR";
+}
+$1 == "input" {  # Print input nets
+    gsub(/;/, "");
+    if ( $2 == "VPWR" || $2 == "VGND" ) {  # ignore power nets
+        next;
+    }
+    if ( NF == 3 ) {  # print buses as net[range]
+        $2 = $3 $2;
+    }
+    print $2, "input std_input";
+}} /project/openlane/runs/railway_100x100/results/lvs/railway_level_crossing_monitor.lvs.powered.v > /project/openlane/runs/railway_100x100/results/cvc/railway_level_crossing_monitor.power"
+
+Mon Oct 19 03:51:43 UTC 2026 - Executing "awk { /Black-box entry subcircuit/ {  # remove black-box defintions
+    while ( $1 != ".ends" ) {
+        getline;
+    }
+    getline;
+}
+/^\*/ {  # remove comments
+    next;
+}
+/^.ENDS .*/ {  # remove name from ends lines
+    print $1;
+    next;
+}
+ {
+    print $0;
+}} /pdks/sky130A/libs.ref/sky130_fd_sc_hd/cdl/sky130_fd_sc_hd.cdl /project/openlane/runs/railway_100x100/results/magic/railway_level_crossing_monitor.lef.spice > /project/openlane/runs/railway_100x100/results/cvc/railway_level_crossing_monitor.cdl"
+
+Mon Oct 19 03:51:43 UTC 2026 - Executing "cvc /openLANE_flow/scripts/cvc/sky130A/cvcrc.sky130A |& tee >&@stdout /project/openlane/runs/railway_100x100/logs/cvc/42-cvc_screen.log"
+
+Mon Oct 19 03:51:43 UTC 2026 - Executing "python3 /openLANE_flow/report_generation_wrapper.py -d /project/openlane -dn railway_level_crossing_monitor -t railway_100x100 -o /project/openlane/runs/railway_100x100/reports/final_summary_report.csv -m /project/openlane/runs/railway_100x100/reports/manufacturability_report.rpt -rs /project/openlane/runs/railway_100x100/reports/runtime_summary_report.rpt -r /project/openlane/runs/railway_100x100"
+

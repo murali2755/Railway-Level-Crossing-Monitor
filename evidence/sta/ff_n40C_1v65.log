@@ -1,0 +1,16 @@
+Warning: /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__ff_n40C_1v65.lib line 23, default_fanout_load is 0.0.
+----- SETUP (max) -----
+Startpoint                           Endpoint                                 Slack
+----------------------------------------------------------------------------------
+_217_/Q (sky130_fd_sc_hd__dfxtp_1)   _221_/D (sky130_fd_sc_hd__dfxtp_1)     48.1024
+
+worst slack 48.10
+----- HOLD (min) -----
+Startpoint                           Endpoint                                 Slack
+----------------------------------------------------------------------------------
+_220_/Q (sky130_fd_sc_hd__dfxtp_1)   _220_/D (sky130_fd_sc_hd__dfxtp_1)      0.2741
+
+worst slack 0.27
+----- TNS / WNS -----
+tns 0.00
+wns 0.00

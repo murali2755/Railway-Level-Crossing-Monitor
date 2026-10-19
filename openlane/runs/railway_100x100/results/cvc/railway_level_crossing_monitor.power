@@ -1,0 +1,10 @@
+VPWR power 1.8
+VGND power 0.0
+#define std_input min@VGND max@VPWR
+barrier_down_sensor input std_input
+barrier_up_sensor input std_input
+clk input std_input
+light_on_sensor input std_input
+reset input std_input
+train_approach input std_input
+train_depart input std_input

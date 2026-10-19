@@ -1,0 +1,7 @@
+openlane/runs/*/tmp/
+openlane/runs/*/logs/
+openlane/runs/*/reports/
+*.vvp
+*.vcd
+__pycache__/
+*.pyc

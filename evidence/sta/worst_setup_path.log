@@ -1,0 +1,42 @@
+
+========== WORST SETUP PATH ==========
+Startpoint: _217_ (rising edge-triggered flip-flop clocked by clk)
+Endpoint: _221_ (rising edge-triggered flip-flop clocked by clk)
+Path Group: clk
+Path Type: max
+
+    Delay      Time   Description
+-------------------------------------------------------------
+   0.0000    0.0000   clock clk (rise edge)
+   0.0000    0.0000   clock network delay (ideal)
+   0.0000    0.0000 ^ _217_/CLK (sky130_fd_sc_hd__dfxtp_1)
+   2.6491    2.6491 ^ _217_/Q (sky130_fd_sc_hd__dfxtp_1)
+   0.6446    3.2937 v _101_/Y (sky130_fd_sc_hd__clkinv_1)
+   5.3730    8.6667 v _116_/X (sky130_fd_sc_hd__or4_1)
+   1.1220    9.7888 ^ _118_/Y (sky130_fd_sc_hd__a22oi_1)
+   5.4061   15.1948 ^ _193_/Y (sky130_fd_sc_hd__nor4b_1)
+   2.2832   17.4780 v _200_/Y (sky130_fd_sc_hd__nor2_1)
+   1.6288   19.1068 ^ _201_/Y (sky130_fd_sc_hd__a211oi_1)
+   0.0000   19.1068 ^ _221_/D (sky130_fd_sc_hd__dfxtp_1)
+            19.1068   data arrival time
+
+  50.0000   50.0000   clock clk (rise edge)
+   0.0000   50.0000   clock network delay (ideal)
+  -0.1000   49.9000   clock uncertainty
+   0.0000   49.9000   clock reconvergence pessimism
+            49.9000 ^ _221_/CLK (sky130_fd_sc_hd__dfxtp_1)
+  -0.8647   49.0353   library setup time
+            49.0353   data required time
+-------------------------------------------------------------
+            49.0353   data required time
+           -19.1068   data arrival time
+-------------------------------------------------------------
+            29.9285   slack (MET)
+
+
+
+========== WNS (setup) ==========
+worst slack 29.93
+
+========== TNS ==========
+tns 0.00
