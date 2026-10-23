@@ -1,167 +1,409 @@
+# 🚦 Railway Level Crossing Monitor
 
-# Railway Level Crossing Monitor
-## SKY130 RTL-to-GDSII ASIC Design Project
+### RTL-to-GDSII ASIC Design using SkyWater SKY130
 
-A compact sequential digital controller that monitors the safety sequence of a
-railway level crossing and raises a fail-safe alarm if the sequence is violated
-or times out. Designed, verified, and taken to a verified GDSII layout on the
-SkyWater SKY130 130 nm process, targeting a 100 um x 100 um die.
+<p align="center">
+  <img src="./images.jpeg" alt="Railway Level Crossing with Warning Lights and Barriers" width="720">
+</p>
+
+A Verilog-based railway level crossing monitoring project that checks the sequence of railway crossing events and identifies unexpected transitions or timeouts. The project demonstrates RTL verification, synthesis, multi-corner Static Timing Analysis (STA), gate-level simulation, and physical design through GDSII generation.
+
+| Project Information | Details |
+|---|---|
+| Project | Railway Level Crossing Monitor |
+| Author | [murali2755](https://github.com/murali2755) |
+| Technology | SkyWater SKY130A |
+| Standard-cell library | `sky130_fd_sc_hd` |
+| RTL language | Verilog HDL |
+| Design flow | RTL → Synthesis → STA → GLS → Physical Design → GDSII |
+| Repository | [Railway-Level-Crossing-Monitor](https://github.com/murali2755/Railway-Level-Crossing-Monitor) |
+
+---
+
+## Table of Contents
+
+1. [Overview](#1-overview)
+2. [Functional Specification](#2-functional-specification)
+3. [Architecture](#3-architecture)
+4. [Repository Structure](#4-repository-structure)
+5. [RTL Verification](#5-rtl-verification)
+6. [Logic Synthesis](#6-logic-synthesis)
+7. [Pre-layout Timing Analysis](#7-pre-layout-timing-analysis)
+8. [Gate-Level Simulation](#8-gate-level-simulation)
+9. [Physical Design](#9-physical-design)
+10. [Post-layout Timing Analysis](#10-post-layout-timing-analysis)
+11. [Pre-layout vs Post-layout Comparison](#11-pre-layout-vs-post-layout-comparison)
+12. [Reproducing the Project](#12-reproducing-the-project)
+13. [Limitations](#13-limitations)
+14. [Author](#14-author)
 
 ---
 
-## 1. Real-World Application
+## 1. Overview
 
-A railway level crossing must execute a strict safety sequence when a train
-approaches: Lights ON -> Barrier DOWN -> Train PASSES -> Barrier UP -> Lights OFF.
-If any step happens out of order, or takes too long, the crossing is unsafe.
-This project implements a dedicated hardware monitor that verifies this sequence
-in real-time and raises a fail-safe alarm on violation.
+A railway level crossing must follow an appropriate sequence of events:
 
-**Users:** railway signalling engineers, safety system integrators.
-**Where:** embedded in a level crossing control cabinet as a parallel safety monitor.
+**Train approaches → Warning lights activate → Barrier is confirmed down → Train passes → Train departs → Barrier is confirmed up.**
 
----
+This project implements a digital monitoring controller that checks sensor feedback and raises a fail-safe indication if an event occurs out of sequence or a monitored operation exceeds its timeout.
+
+### Project Highlights
+
+- Six-state Finite State Machine (FSM)
+- Timeout and invalid-sequence detection
+- Error-code reporting and fail-safe indication
+- RTL simulation and waveform verification
+- SKY130 standard-cell synthesis
+- Pre-layout and post-layout STA
+- Multi-corner timing analysis
+- Physical design and GDSII generation
 
 ## 2. Functional Specification
 
-| Condition | Action |
+| Event or Condition | Expected Response |
 |---|---|
-| `train_approach` = 1 | FSM moves to S_WARN (turn on lights) |
-| `light_on_sensor` = 1 in time | FSM moves to S_BARRIER (lower barrier) |
-| `barrier_down_sensor` = 1 in time | FSM moves to S_PASSING (train crosses) |
-| `train_depart` = 1 | FSM moves to S_CLEAR (raise barrier) |
-| `barrier_up_sensor` = 1 in time | FSM returns to S_IDLE (safe state) |
-| Timeout in any state | FSM moves to S_FAULT (`fail_safe` = 1) |
-| Out-of-order sensor | FSM moves to S_FAULT (`fail_safe` = 1) |
+| `train_approach` | Enter warning state |
+| `light_on_sensor` | Confirm warning lights |
+| `barrier_down_sensor` | Confirm barrier-down status |
+| `train_depart` | Enter crossing-clear stage |
+| `barrier_up_sensor` | Confirm barrier-up status and return to idle |
+| Timeout or invalid sequence | Enter fault state and assert `fail_safe` |
 
-**Motor interlock:** `fail_safe` and `sequence_ok` are never both 1.
+### RTL Interface
 
-**`error_code[2:0]`:** 000 = no error; 001-110 = specific violation.
-
----
-
-## 3. RTL Interface
-
-**Inputs (12 pins):**
-`clk`, `reset`, `train_approach`, `train_depart`, `light_on_sensor`,
-`barrier_down_sensor`, `barrier_up_sensor`
-
-**Outputs (5 pins):**
-`fail_safe`, `sequence_ok`, `error_code[2:0]`
-
----
-
-## 4. Sequential Logic
-
-- **6-state FSM:** S_IDLE (000), S_WARN (001), S_BARRIER (010), S_PASSING (011), S_CLEAR (100), S_FAULT (101)
-- **State register:** 6 flip-flops (one-hot encoding via synthesis)
-- **Timeout counter:** 8-bit shared counter
-- **Error register:** 3-bit latched error code
-- **Total flip-flops:** 17 (FSM: 6, counter: 8, error: 3)
-- No memories, no latches, no macros
-
----
-
-## 5. Verification Summary
-
-### 5.1 RTL Simulation (Icarus Verilog 10.1)
-- 13 self-checking test cases
-- Result: **14 / 14 PASSED**
-
-### 5.2 Yosys Synthesis
-- Target: `sky130_fd_sc_hd` high-density cells
-- Result: **139 cells, 17 flip-flops, 0 latches**
-
-### 5.3 Pre-Layout STA (OpenSTA, all 16 corners)
-- Worst setup: **+29.93 ns** (ss_n40C_1v28) on a 50 ns clock
-- Worst hold: **+0.18 ns** (ff_n40C_1v95)
-- All corners: **PASS**
-
-### 5.4 Gate-Level Simulation (Icarus + SKY130 models)
-- Functional-only FF model used (standard practice - timing verified by STA)
-- Result: **14 / 14 PASSED**
-
-### 5.5 OpenLane Physical Design (v0.21)
-- Die area: **100 um x 100 um**
-- Core area: 88.96 um x 78.24 um
-- Total runtime: **3 min 27 sec**
-- Final cell count: **139**
-
-| Check | Result |
+| Inputs | Outputs |
 |---|---|
-| TritonRoute violations | **0** |
-| Short violations | **0** |
-| Metal spacing violations | **0** |
-| Off-grid violations | **0** |
-| Magic DRC | **0** |
-| Antenna violations | **0** |
-| LVS errors | **0** |
-| CVC errors | **0** |
+| `clk`, `reset` | `fail_safe` |
+| `train_approach` | `sequence_ok` |
+| `train_depart` | `error_code[2:0]` |
+| `light_on_sensor` | |
+| `barrier_down_sensor` | |
+| `barrier_up_sensor` | |
 
-### 5.6 Post-Layout STA (OpenSTA, all 16 corners, with SPEF)
-- Worst setup: **+28.85 ns** (ss_n40C_1v28)
-- Worst hold: **+0.20 ns** (ff_n40C_1v95)
-- All corners: **PASS**
+## 3. Architecture
 
-### 5.7 Pre vs Post-Layout Delta
-- Setup delta: **-1.080 ns to -0.250 ns**
-- Hold delta: **+0.020 ns to +0.740 ns**
+```text
+ train_approach ───┐
+ train_depart ─────┤
+ light_on_sensor ──┤
+ barrier_down ─────┼───┐
+ barrier_up ───────┤   │
+ clk / reset ──────┘   ▼
+                 +--------------------+
+                 | Railway Crossing   |
+                 | Monitoring FSM     |
+                 |                    |
+                 | Timeout Counter    |
+                 | Error Detection    |
+                 +--------------------+
+                    │       │       │
+                    ▼       ▼       ▼
+                 fail_safe sequence_ok error_code
+```
 
----
+The controller uses six conceptual states:
 
-## 6. Final Deliverables
+- `S_IDLE` — waiting for a train
+- `S_WARN` — warning phase
+- `S_BARRIER` — barrier confirmation
+- `S_PASSING` — train passing
+- `S_CLEAR` — crossing-clear sequence
+- `S_FAULT` — fault handling
 
-| Artifact | Path |
+## 4. Repository Structure
+
+```text
+Railway-Level-Crossing-Monitor/
+├── rtl/
+├── tb/
+├── sim/
+│   └── rtl/
+├── synthesis/
+├── liberty/
+├── constraints/
+├── timing/
+├── gls/
+├── openlane/
+├── results/
+├── evidence/
+├── Results_Screenshoots/
+├── plot_results.py
+├── show_summary.sh
+├── viva_notes.md
+└── README.md
+```
+
+The screenshots referenced below are stored in the repository root. The folders above describe the project organization; inspect the repository for the precise contents of each folder.
+
+## 5. RTL Verification
+
+RTL simulation checks the controller's state transitions and output behavior for normal crossing operation, invalid event sequences, and fault conditions.
+
+### RTL Waveform — GTKWave
+
+<p align="center">
+  <img src="./railway_gtkwave.png" alt="Railway Level Crossing RTL Waveform" width="900">
+</p>
+
+*Figure 1 — RTL simulation waveform displayed using GTKWave.*
+
+## 6. Logic Synthesis
+
+Yosys converts the Verilog RTL into a synthesized logic netlist using the selected standard-cell library.
+
+### 6.1 Synthesis Statistics
+
+<p align="center">
+  <img src="./D1_synthesis_stats.png.png" alt="Yosys Synthesis Statistics" width="900">
+</p>
+
+*Figure 2 — Synthesis statistics generated by Yosys.*
+
+### 6.2 Standard-cell Breakdown
+
+<p align="center">
+  <img src="./D2_cell_breakdown.png.png" alt="Standard Cell Breakdown" width="900">
+</p>
+
+*Figure 3 — Distribution of mapped standard cells.*
+
+### 6.3 Synthesized Netlist
+
+<p align="center">
+  <img src="./D3_netlist.png" alt="Synthesized Netlist" width="900">
+</p>
+
+*Figure 4 — Synthesized hardware netlist.*
+
+The project documentation reports 139 mapped standard cells, 17 flip-flops, and zero latches.
+
+## 7. Pre-layout Timing Analysis
+
+Pre-layout STA evaluates timing paths before physical implementation. The analysis uses clock constraints and timing libraries to assess setup and hold requirements.
+
+### 7.1 Pre-layout Summary
+
+<p align="center">
+  <img src="./E1_prelayout_summary.png.png" alt="Pre-layout STA Summary" width="900">
+</p>
+
+*Figure 5 — Pre-layout timing summary.*
+
+### 7.2 Worst Setup Path
+
+<p align="center">
+  <img src="./E2_worst_setup_path.png.png" alt="Worst Setup Timing Path" width="900">
+</p>
+
+*Figure 6 — Worst setup timing path.*
+
+### 7.3 Worst Hold Path
+
+<p align="center">
+  <img src="./E3_WORST_HOLD.png" alt="Worst Hold Timing Path" width="900">
+</p>
+
+*Figure 7 — Worst hold timing path.*
+
+### 7.4 WNS and TNS Across Corners
+
+<p align="center">
+  <img src="./E5_wns_tns_sweep.png.png" alt="Pre-layout WNS and TNS Corner Sweep" width="900">
+</p>
+
+*Figure 8 — Pre-layout timing metrics across process, voltage, and temperature corners.*
+
+## 8. Gate-Level Simulation
+
+Gate-Level Simulation (GLS) verifies the synthesized netlist using a testbench and the appropriate simulation models.
+
+The purpose is to confirm that the synthesized logic retains the expected behavior. Timing checks are evaluated separately using STA and, where configured, timing-aware simulation.
+
+## 9. Physical Design
+
+The physical implementation flow uses OpenLane and the configured SKY130 technology files.
+
+The major stages include floorplanning, placement, clock tree synthesis, routing, and final layout generation.
+
+### 9.1 OpenLane Flow Completion
+
+<p align="center">
+  <img src="./G1_openlane_success.png" alt="OpenLane Flow Completion" width="900">
+</p>
+
+*Figure 9 — OpenLane flow completion evidence.*
+
+### 9.2 Floorplan
+
+<p align="center">
+  <img src="./Fig5_2_floorplan.png" alt="Physical Design Floorplan" width="900">
+</p>
+
+*Figure 10 — Die and core floorplan.*
+
+### 9.3 Placement
+
+<p align="center">
+  <img src="./Fig5_3_placement.png" alt="Standard Cell Placement" width="900">
+</p>
+
+*Figure 11 — Standard-cell placement.*
+
+### 9.4 Routing
+
+<p align="center">
+  <img src="./Fig5_4_routing.png" alt="Routed Physical Design" width="900">
+</p>
+
+*Figure 12 — Physical routing results.*
+
+### 9.5 Final GDSII Layout
+
+<p align="center">
+  <img src="./Fig5_5_final_gds.png" alt="Final GDSII Layout" width="900">
+</p>
+
+*Figure 13 — Final layout representation.*
+
+## 10. Post-layout Timing Analysis
+
+Post-layout STA evaluates timing after physical implementation. When extracted parasitics are included, the analysis accounts for physical interconnect effects.
+
+### 10.1 Post-layout Setup WNS
+
+<p align="center">
+  <img src="./G7_post_setup_wns.png" alt="Post-layout Setup WNS" width="900">
+</p>
+
+*Figure 14 — Post-layout setup worst negative slack.*
+
+### 10.2 Post-layout Hold WNS
+
+<p align="center">
+  <img src="./G8_post_hold_wns.png" alt="Post-layout Hold WNS" width="900">
+</p>
+
+*Figure 15 — Post-layout hold worst negative slack.*
+
+### 10.3 Post-layout Setup TNS
+
+<p align="center">
+  <img src="./G9_post_setup_tns.png" alt="Post-layout Setup TNS" width="900">
+</p>
+
+*Figure 16 — Post-layout setup total negative slack.*
+
+### 10.4 Post-layout Hold TNS
+
+<p align="center">
+  <img src="./G12_post_holf_tns.png" alt="Post-layout Hold TNS" width="900">
+</p>
+
+*Figure 17 — Post-layout hold total negative slack.*
+
+## 11. Pre-layout vs Post-layout Comparison
+
+The comparison evaluates how physical implementation affects timing performance. The same timing constraints and corresponding PVT corners should be used for a valid comparison.
+
+### 11.1 Pre-layout Setup WNS
+
+<p align="center">
+  <img src="./G14_pre_setup_wns.png" alt="Pre-layout Setup WNS" width="900">
+</p>
+
+### 11.2 Pre-layout Hold WNS
+
+<p align="center">
+  <img src="./G15_pre_hold_wns.png" alt="Pre-layout Hold WNS" width="900">
+</p>
+
+### 11.3 Pre-layout Setup TNS
+
+<p align="center">
+  <img src="./G16_Pre_setup_tns.png" alt="Pre-layout Setup TNS" width="900">
+</p>
+
+### 11.4 Pre-layout Hold TNS
+
+<p align="center">
+  <img src="./G17_pre_hold_tns.png" alt="Pre-layout Hold TNS" width="900">
+</p>
+
+### 11.5 Additional Pre-layout Setup Timing
+
+<p align="center">
+  <img src="./G18_Pre_setup_ws.png" alt="Additional Pre-layout Setup Timing" width="900">
+</p>
+
+### 11.6 Direct Pre-layout vs Post-layout Comparison
+
+<p align="center">
+  <img src="./G10_prevspost_setup_wns.png" alt="Pre-layout versus Post-layout Setup WNS" width="900">
+</p>
+
+*Figure 23 — Comparison of setup WNS before and after physical implementation.*
+
+<p align="center">
+  <img src="./G11_pre_vs_Post_hold_tns.png" alt="Pre-layout versus Post-layout Hold TNS" width="900">
+</p>
+
+*Figure 24 — Comparison of pre-layout and post-layout hold TNS.*
+
+### Timing Metrics Explained
+
+| Metric | Meaning |
 |---|---|
-| GDSII (KLayout) | `results/railway_level_crossing_monitor.gds` |
-| GDSII (Magic) | `results/railway_level_crossing_monitor.magic.gds` |
-| SPEF | `results/railway_level_crossing_monitor.spef` |
-| Routed netlist | `results/railway_level_crossing_monitor.synthesis_preroute.v` |
-| Flow summary | `results/final_summary_report.csv` |
-| Pre-layout STA | `timing/prelayout/*.log` |
-| Post-layout STA | `timing/postlayout/*.log` |
-| Pre-vs-post table | `timing/comparison.txt` |
-| RTL | `rtl/railway_level_crossing_monitor.v` |
-| Testbench | `tb/railway_level_crossing_monitor_tb.v` |
-| GLS setup | `gls/` |
+| WNS | Worst Negative Slack |
+| TNS | Total Negative Slack |
+| Setup slack | Indicates whether data arrives before the required setup time |
+| Hold slack | Indicates whether data remains stable for the required hold time |
+| Critical path delay | Delay of the limiting timing path |
+| PVT corner | Process, voltage, and temperature operating condition |
+
+Positive slack generally indicates that the corresponding timing requirement is met. Negative slack indicates a timing violation.
+
+## 12. Reproducing the Project
+
+Clone the repository:
+
+```bash
+git clone https://github.com/murali2755/Railway-Level-Crossing-Monitor.git
+cd Railway-Level-Crossing-Monitor
+```
+
+Inspect the RTL and testbench directories:
+
+```bash
+ls rtl
+ls tb
+```
+
+For RTL simulation, use the testbench and source files included in your repository. For synthesis, STA, GLS, and physical design, follow the scripts and configuration provided in their respective directories.
+
+Required dependencies may include:
+
+- Icarus Verilog
+- GTKWave
+- Yosys
+- OpenSTA
+- OpenLane
+- SKY130 PDK and timing libraries
+
+## 13. Limitations
+
+- This is an educational hardware-monitoring prototype, not a certified railway signalling system.
+- Sensor signals are assumed to be suitable digital inputs.
+- Physical deployment would require additional redundancy, diagnostics, safety analysis, and regulatory approval.
+- Reported performance values must be interpreted using the actual timing constraints and reports.
+
+## 14. Author
+
+**Murali**
+
+GitHub: [@murali2755](https://github.com/murali2755)
+
+Project Repository: [Railway-Level-Crossing-Monitor](https://github.com/murali2755/Railway-Level-Crossing-Monitor)
 
 ---
 
-## 7. Design Decisions and Trade-offs
-
-| Decision | Reason |
-|---|---|
-| 6-state FSM | Sufficient to model the safety sequence without over-complicating |
-| One-hot encoding | Yosys chose this automatically; 6 FFs for 6 states |
-| 8-bit shared timeout counter | Reused across states to save area |
-| Functional FF for GLS | Sky130 UDP hold-check causes false X; STA covers timing |
-| `FP_CORE_UTIL=30` | Design is ~20% of core; leaves room for routing |
-| `PL_TARGET_DENSITY=0.40` | Above actual utilisation; prevents RePlAce divergence |
-| `PL_BASIC_PLACEMENT=1` | Robust for small designs in a large die |
-| 50 ns clock period | 10x slower than the intrinsic critical path; large timing margin |
-
----
-
-## 8. Known Limitations
-
-- Sensor inputs are assumed to be clean digital signals (no debounce).
-- No physical position feedback for the barrier - command-based monitor.
-- No power analysis was performed.
-- The design does not include an ADC; it expects an already-digitized sensor interface.
-
----
-
-## 9. Reproducing the Flow
-
-1. RTL simulation: `iverilog -g2012 -o tb.vvp rtl/*.v tb/*.v && vvp tb.vvp`
-2. Synthesis: `yosys -l synth.log synth.ys`
-3. Pre-layout STA: OpenSTA with SDC over 16 SKY130 corners
-4. Gate-level simulation: `iverilog -g2012 -DSKY130_FD_SC_HD__DFXTP_1_V` with functional FF override
-5. Physical design: OpenLane v0.21 in Docker, `DIE_AREA = 0 0 100 100`, `PDK = sky130A`
-6. Post-layout STA: OpenSTA with SPEF over 16 SKY130 corners
-
----
-
-## 10. Viva Quick Reference
-
-See `viva_notes.md` for anticipated questions and prepared answers.
+⭐ If you find this project useful, consider starring the repository.
