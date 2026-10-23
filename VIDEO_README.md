@@ -34,7 +34,7 @@ Watch the project demonstration to learn about the implementation and verificati
 
 Read the technical documentation for further details about the design and implementation.
 
-**[📘 Open Project Documentation](https://drive.google.com/file/d/1q6QeR3upWorUUmkdBiOHcUeg6PMIFHgY/view?usp=drivesdk)**
+**[📘 Open Project Documentation](https://drive.google.com/file/d/1KWT5m-WaulBJMnAH1C5vsxKFlKQI_nDU/view?usp=drivesdk)**
 
 ---
 
