@@ -28,17 +28,9 @@ Watch the project demonstration to learn about the implementation and verificati
 
 ---
 
-## 📊 2. Project Presentation
 
-Access the project presentation for an overview of the project objectives, design architecture, implementation flow, and results.
 
-**[📑 Open Project Presentation](https://docs.google.com/videos/d/1j7WrCodtu1FDpHAOpOErHvyKVRGxEwG9anxv4JIW6Gk/edit?usp=drivesdk)**
-
-> **Note:** The presentation link currently points to the same Google Drive video URL. Replace it with the actual PPT link when available.
-
----
-
-## 📄 3. Technical Documentation
+## 📄 2. Technical Documentation
 
 Read the technical documentation for further details about the design and implementation.
 
@@ -46,7 +38,7 @@ Read the technical documentation for further details about the design and implem
 
 ---
 
-## ⚙️ 4. Project Overview
+## ⚙️ 3. Project Overview
 
 The Railway Level Crossing Monitor is a digital hardware project developed using Verilog HDL. It monitors the expected sequence of railway crossing events and identifies invalid transitions or timeout conditions.
 
@@ -84,7 +76,7 @@ GDSII Generation
 
 ---
 
-## 🔗 5. GitHub Repository
+## 🔗 4. GitHub Repository
 
 **Source Code:** [Railway-Level-Crossing-Monitor](https://github.com/murali2755/Railway-Level-Crossing-Monitor)
 
